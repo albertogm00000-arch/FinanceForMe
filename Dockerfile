@@ -1,15 +1,21 @@
-# Etapa 1: construir dependencias PHP
+# Etapa 1: construir dependencias PHP (Alpine)
 FROM composer:2 AS build
 WORKDIR /app
-RUN apt-get update && apt-get install -y zip unzip
+
+# Instalar zip/unzip en Alpine
+RUN apk add --no-cache zip unzip
+
+# Copiar archivos de Composer y ejecutar instalación
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
+
+# Copiar el resto del código
 COPY . .
 
-# Etapa 2: servidor final
+# Etapa 2: servidor final (PHP + Apache)
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias
+# Instalar extensiones necesarias para Laravel
 RUN docker-php-ext-install pdo pdo_mysql
 
 # Copiar código del build
@@ -18,13 +24,13 @@ COPY --from=build /app /var/www/html
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Configurar Apache y permisos
+# Configurar permisos y Apache
 RUN chown -R www-data:www-data /var/www/html \
     && a2enmod rewrite \
     && echo "<Directory /var/www/html/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-    </Directory>" > /etc/apache2/conf-available/laravel.conf \
+AllowOverride All\n\
+Require all granted\n\
+</Directory>" > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
 # Exponer puerto 80
