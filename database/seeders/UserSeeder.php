@@ -17,21 +17,5 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        // Crear cuentas de ejemplo
-        Account::create([
-            'user_id' => $user->id,
-            'name' => 'Cuenta Corriente',
-            'type' => 'bank',
-            'balance' => 1500.00,
-            'currency' => 'EUR'
-        ]);
-
-        Account::create([
-            'user_id' => $user->id,
-            'name' => 'Efectivo',
-            'type' => 'cash',
-            'balance' => 200.00,
-            'currency' => 'EUR'
-        ]);
     }
 }
